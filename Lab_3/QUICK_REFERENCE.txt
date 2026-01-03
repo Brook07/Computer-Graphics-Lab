@@ -1,0 +1,300 @@
+"""
+Quick Reference Guide for 2D Transformations
+Computer Graphics Assignment - Lab 3
+"""
+
+# ============================================================================
+# TRANSFORMATION MATRICES QUICK REFERENCE
+# ============================================================================
+
+"""
+All points are represented in HOMOGENEOUS COORDINATES: (x, y, 1)
+
+1. TRANSLATION MATRIX
+   ┌         ┐
+   │ 1  0 tx │
+   │ 0  1 ty │
+   │ 0  0  1 │
+   └         ┘
+   
+   Effect: Moves a point from (x, y) to (x+tx, y+ty)
+   Usage: Transformation2D.translation_matrix(tx, ty)
+   Example: translation_matrix(5, 3)  # Move 5 units right, 3 units up
+
+
+2. ROTATION MATRIX (Counter-clockwise)
+   ┌              ┐
+   │ cos θ -sin θ 0 │
+   │ sin θ  cos θ 0 │
+   │ 0      0     1 │
+   └              ┘
+   
+   Effect: Rotates a point by θ degrees around origin
+   Usage: Transformation2D.rotation_matrix(angle_degrees)
+   Example: rotation_matrix(45)  # Rotate 45 degrees counter-clockwise
+
+
+3. SCALING MATRIX
+   ┌         ┐
+   │ sx 0  0 │
+   │ 0  sy 0 │
+   │ 0  0  1 │
+   └         ┘
+   
+   Effect: Scales a point by factors sx and sy
+   Usage: Transformation2D.scaling_matrix(sx, sy)
+   Example: scaling_matrix(2, 1.5)  # 2x in X direction, 1.5x in Y direction
+
+
+4. REFLECTION MATRIX - About Y-axis (Vertical Mirror)
+   ┌         ┐
+   │ -1 0  0 │
+   │ 0  1  0 │
+   │ 0  0  1 │
+   └         ┘
+   
+   Effect: Flips shape across Y-axis
+   Usage: Transformation2D.reflection_matrix('y')
+
+
+5. REFLECTION MATRIX - About X-axis (Horizontal Mirror)
+   ┌         ┐
+   │ 1  0  0 │
+   │ 0 -1  0 │
+   │ 0  0  1 │
+   └         ┘
+   
+   Effect: Flips shape across X-axis
+   Usage: Transformation2D.reflection_matrix('x')
+
+
+6. REFLECTION MATRIX - About Origin
+   ┌         ┐
+   │ -1 0  0 │
+   │ 0 -1  0 │
+   │ 0  0  1 │
+   └         ┘
+   
+   Effect: Reflects shape through origin point
+   Usage: Transformation2D.reflection_matrix('origin')
+
+
+7. SHEARING MATRIX
+   ┌         ┐
+   │ 1  shx 0 │
+   │ shy 1  0 │
+   │ 0   0  1 │
+   └         ┘
+   
+   Effect: Slants the shape along X and/or Y direction
+   - shx > 0: Slants right with increasing Y
+   - shy > 0: Slants up with increasing X
+   Usage: Transformation2D.shearing_matrix(shx, shy)
+   Example: shearing_matrix(0.5, 0)  # Shear only in X direction
+
+
+8. COMPOSITE TRANSFORMATION
+   Combined Matrix = T_n × T_(n-1) × ... × T_2 × T_1
+   
+   Effect: Applies multiple transformations in sequence
+   Usage: Transformation2D.composite_transformation(T1, T2, T3, ...)
+   Important: Order matters! Different order = Different result
+   
+   Example:
+   trans = translation_matrix(5, 3)
+   rot = rotation_matrix(45)
+   scale = scaling_matrix(2, 2)
+   combined = composite_transformation(scale, rot, trans)
+   # Applied as: First translate, then rotate, then scale
+
+"""
+
+
+# ============================================================================
+# QUICK USAGE EXAMPLES
+# ============================================================================
+
+def quick_examples():
+    """Quick copy-paste examples"""
+    
+    # EXAMPLE 1: Create a shape and apply translation
+    print("EXAMPLE 1: Translation")
+    print("-" * 40)
+    # from 2D_Transformations import Shape2D, Transformation2D
+    # triangle = Shape2D([(0, 0), (4, 0), (2, 3)], name="Triangle")
+    # trans_matrix = Transformation2D.translation_matrix(5, 3)
+    # triangle.apply_transformation(trans_matrix)
+    
+    # EXAMPLE 2: Rotation
+    print("EXAMPLE 2: Rotation")
+    print("-" * 40)
+    # rectangle = Shape2D([(0, 0), (4, 0), (4, 3), (0, 3)], name="Rectangle")
+    # rot_matrix = Transformation2D.rotation_matrix(45)
+    # rectangle.apply_transformation(rot_matrix)
+    
+    # EXAMPLE 3: Scaling
+    print("EXAMPLE 3: Scaling")
+    print("-" * 40)
+    # square = Shape2D([(0, 0), (3, 0), (3, 3), (0, 3)], name="Square")
+    # scale_matrix = Transformation2D.scaling_matrix(2, 1.5)
+    # square.apply_transformation(scale_matrix)
+    
+    # EXAMPLE 4: Reflection
+    print("EXAMPLE 4: Reflection")
+    print("-" * 40)
+    # triangle = Shape2D([(0, 0), (4, 0), (2, 3)], name="Triangle")
+    # ref_matrix = Transformation2D.reflection_matrix('y')  # About Y-axis
+    # triangle.apply_transformation(ref_matrix)
+    
+    # EXAMPLE 5: Shearing
+    print("EXAMPLE 5: Shearing")
+    print("-" * 40)
+    # square = Shape2D([(0, 0), (2, 0), (2, 2), (0, 2)], name="Square")
+    # shear_matrix = Transformation2D.shearing_matrix(0.5, 0.3)
+    # square.apply_transformation(shear_matrix)
+    
+    # EXAMPLE 6: Composite Transformation
+    print("EXAMPLE 6: Composite Transformation")
+    print("-" * 40)
+    # rectangle = Shape2D([(0, 0), (4, 0), (4, 3), (0, 3)], name="Rectangle")
+    # t = Transformation2D.translation_matrix(2, 2)
+    # r = Transformation2D.rotation_matrix(30)
+    # s = Transformation2D.scaling_matrix(1.5, 1.5)
+    # composite = Transformation2D.composite_transformation(s, r, t)
+    # rectangle.apply_transformation(composite)
+
+
+# ============================================================================
+# IMPORTANT CONCEPTS
+# ============================================================================
+
+"""
+1. HOMOGENEOUS COORDINATES
+   - Every 2D point (x, y) becomes (x, y, 1)
+   - Allows translation to be represented as matrix multiplication
+   - Third element is always 1 (for our purposes)
+
+2. TRANSFORMATION ORDER IN COMPOSITE
+   - Important: Multiple transformations applied in specific order
+   - Order affects final result
+   - Read from RIGHT to LEFT mathematically, LEFT to RIGHT in function
+   
+   Example: T × R × S applied to point means:
+   - First apply S (scaling)
+   - Then apply R (rotation)
+   - Then apply T (translation)
+
+3. POINT TRANSFORMATION
+   P' = T × P
+   Where:
+   - P = [x, y, 1]^T (homogeneous point)
+   - T = 3×3 transformation matrix
+   - P' = [x', y', 1]^T (transformed point)
+
+4. SHAPE TRANSFORMATION
+   All vertices of a shape are transformed using the same matrix
+
+5. RESETTING A SHAPE
+   Use shape.reset() to return to original position after transformations
+
+6. MATRIX MULTIPLICATION
+   For composite transformations:
+   C = T_last × T_second-last × ... × T_first
+   Apply in reverse order of what you want
+"""
+
+
+# ============================================================================
+# COMMON MISTAKES AND FIXES
+# ============================================================================
+
+"""
+MISTAKE 1: Wrong rotation angle
+❌ rotation_matrix(45)  # Assumes degrees, but using radians internally
+✓ rotation_matrix(45)   # Correctly converts to radians internally
+
+MISTAKE 2: Order matters in composite
+❌ composite_transformation(T, R, S)  # Applies S first, then R, then T
+✓ Understand that order affects result - test both if unsure
+
+MISTAKE 3: Forgetting to reset between transformations
+❌ shape.apply_transformation(T1)
+   shape.apply_transformation(T2)
+   # T2 applied to already transformed coordinates!
+✓ Create new Shape object or use reset() between different demonstrations
+
+MISTAKE 4: Expecting 2D transformation with 2×2 matrix
+❌ T = np.array([[cos_a, -sin_a], [sin_a, cos_a]])  # Can't do translation!
+✓ Always use 3×3 matrices with homogeneous coordinates for full 2D power
+
+MISTAKE 5: Mixing up reflection axes
+❌ reflection_matrix('x') for Y-axis reflection
+✓ 'x' reflects about X-axis (horizontal flip)
+   'y' reflects about Y-axis (vertical flip)
+"""
+
+
+# ============================================================================
+# MATRIX PROPERTIES
+# ============================================================================
+
+"""
+TRANSLATION
+- Preserves shape and orientation
+- Changes position only
+
+ROTATION
+- Preserves shape and size
+- Changes orientation
+- Positive angle = counter-clockwise
+- Negative angle = clockwise
+
+SCALING
+- Changes size
+- Can be non-uniform (different sx, sy)
+- Scaling by negative values flips the object
+
+REFLECTION
+- Creates mirror image
+- Preserves size
+- About different axes gives different results
+
+SHEARING
+- Distorts the shape
+- Preserves area (for unit shearing)
+- X-shearing and Y-shearing can be combined
+
+COMPOSITE
+- Combines effects of multiple transformations
+- Order of operations matters
+- Useful for complex animations
+"""
+
+
+# ============================================================================
+# VISUALIZATION HINTS
+# ============================================================================
+
+"""
+The Visualizer2D class provides:
+
+1. plot_shape(shape, ax, color='blue', ...)
+   - Plots a single shape on matplotlib axis
+   - Can customize color, style, line width, etc.
+
+2. plot_comparison(original, transformed, title, filename)
+   - Side-by-side comparison of original and transformed
+   - Shows original on left (blue), transformed on right (red)
+   - Optional filename to save the figure
+
+Example:
+Visualizer2D.plot_comparison(original_shape, transformed_shape, 
+                             title="My Transformation",
+                             filename="result.png")
+"""
+
+
+if __name__ == "__main__":
+    print(__doc__)
+    print("\nFor complete working examples, run: python 2D_Transformations.py")
+    print("For additional examples, run: python Examples.py")
