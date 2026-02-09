@@ -1,6 +1,9 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import numpy as np
+from PIL import Image
+import os
 
 window_width = 1000
 window_height = 700
@@ -24,6 +27,9 @@ sh_zy = 0.0
 
 projection = "perspective"
 
+# Screenshot functionality
+screenshot_counter = 0
+
 def get_shear_matrix():
     return [
         1.0, sh_yx, sh_zx, 0.0,
@@ -31,6 +37,71 @@ def get_shear_matrix():
         sh_xz, sh_yz, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0,
     ]
+
+def save_screenshot(filename):
+    """Save current OpenGL framebuffer as PNG image"""
+    # Create fig directory if it doesn't exist
+    if not os.path.exists('fig'):
+        os.makedirs('fig')
+    
+    # Read pixels from framebuffer
+    glReadBuffer(GL_FRONT)
+    pixels = glReadPixels(0, 0, window_width, window_height, GL_RGB, GL_UNSIGNED_BYTE)
+    
+    # Convert to PIL Image (flip vertically since OpenGL origin is bottom-left)
+    image = Image.frombytes("RGB", (window_width, window_height), pixels)
+    image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    
+    # Save image
+    filepath = os.path.join('fig', filename)
+    image.save(filepath)
+    print(f"Screenshot saved: {filepath}")
+
+def capture_transformation_demo(demo_type, steps=5):
+    """Capture a series of screenshots showing transformation progression"""
+    global tx, ty, tz, rx, ry, rz, sx, sy, sz
+    global sh_xy, sh_xz, sh_yx, sh_yz, sh_zx, sh_zy
+    
+    # Reset all transformations
+    tx = ty = tz = 0.0
+    rx = ry = rz = 0.0
+    sx = sy = sz = 1.0
+    reset_shear()
+    
+    if demo_type == "translation":
+        for i in range(steps):
+            tx = i * 0.3
+            ty = i * 0.2
+            tz = i * 0.1
+            glutPostRedisplay()
+            glutMainLoopEvent()
+            save_screenshot(f"translation_step_{i+1}.png")
+    
+    elif demo_type == "rotation":
+        for i in range(steps):
+            rx = i * 15
+            ry = i * 10
+            rz = i * 20
+            glutPostRedisplay()
+            glutMainLoopEvent()
+            save_screenshot(f"rotation_step_{i+1}.png")
+    
+    elif demo_type == "scaling":
+        for i in range(steps):
+            sx = 1.0 + i * 0.2
+            sy = 1.0 + i * 0.15
+            sz = 1.0 + i * 0.1
+            glutPostRedisplay()
+            glutMainLoopEvent()
+            save_screenshot(f"scaling_step_{i+1}.png")
+    
+    elif demo_type == "shearing":
+        for i in range(steps):
+            sh_xy = i * 0.1
+            sh_yz = i * 0.08
+            glutPostRedisplay()
+            glutMainLoopEvent()
+            save_screenshot(f"shearing_step_{i+1}.png")
 
 def draw_axes():
     glDisable(GL_LIGHTING)
@@ -139,6 +210,19 @@ def keyboard(key, x, y):
         rx, ry, rz = 0.0, 0.0, 0.0
         sx, sy, sz = 1.0, 1.0, 1.0
         reset_shear()
+    elif k == "f":
+        # Take screenshot
+        global screenshot_counter
+        screenshot_counter += 1
+        save_screenshot(f"screenshot_{screenshot_counter:03d}.png")
+    elif k == "d":
+        # Capture demonstration sequences
+        print("Capturing transformation demonstrations...")
+        capture_transformation_demo("translation")
+        capture_transformation_demo("rotation")
+        capture_transformation_demo("scaling")
+        capture_transformation_demo("shearing")
+        print("All demonstration screenshots captured!")
     glutPostRedisplay()
 
 def reset_shear():
